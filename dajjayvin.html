@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minion Runner 3D</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: linear-gradient(#8ec9ff, #cdeaff);
+    display:flex; align-items:center; justify-content:center;
+    height:100vh; font-family: 'Segoe UI', Arial, sans-serif;
+    overflow:hidden;
+  }
+  #gameContainer { position:relative; width:400px; height:700px; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+  #game3d { width:400px; height:700px; display:block; }
+  #hud {
+    position:absolute; top:12px; left:0; width:100%;
+    display:flex; justify-content:space-between; padding:0 16px;
+    color:#fff; font-weight:bold; font-size:18px;
+    text-shadow: 2px 2px 3px rgba(0,0,0,0.5);
+    pointer-events:none;
+  }
+  #modeTag {
+    position:absolute; top:40px; left:16px;
+    color:#fff; font-size:13px; font-weight:bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+    pointer-events:none;
+    background:rgba(0,0,0,0.25);
+    padding:2px 10px; border-radius:10px;
+  }
+  #overlay {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.6);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:#fff; text-align:center; border-radius:12px;
+    padding: 20px;
+  }
+  #overlay h1 { font-size:32px; color:#ffe14d; text-shadow:2px 2px 4px #000; }
+  #overlay p { margin-top:8px; font-size:14px; line-height:1.5; }
+  .modeBtns { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; justify-content:center; }
+  .modeBtn {
+    padding:12px 18px; font-size:15px; font-weight:bold;
+    border:none; border-radius:8px; cursor:pointer;
+    box-shadow:0 4px 0 rgba(0,0,0,0.3);
+    color:#fff;
+  }
+  .modeBtn:active { transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,0.3); }
+  .modeBtn.easy { background:#4caf50; }
+  .modeBtn.medium { background:#ff9800; }
+  .modeBtn.hard { background:#e53935; }
+  .hidden { display:none !important; }
+  #controls {
+    position:absolute; bottom:10px; width:100%; text-align:center;
+    color:#fff; font-size:12px; text-shadow:1px 1px 2px #000; pointer-events:none;
+  }
+  #loadingMsg {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:16px; background:#8ec9ff;
+  }
+</style>
+</head>
+<body>
+<div id="gameContainer">
+  <div id="loadingMsg">Memuat dunia 3D...</div>
+  <div id="game3d"></div>
+  <div id="hud">
+    <div>Skor: <span id="score">0</span></div>
+    <div>Terbaik: <span id="best">0</span></div>
+  </div>
+  <div id="modeTag">Mode: <span id="modeLabel">-</span></div>
+  <div id="controls">← → pindah jalur • ↑ / Spasi lompat • ↓ merunduk</div>
+
+  <div id="overlay">
+    <div id="menuScreen">
+      <h1>MINION RUNNER 3D</h1>
+      <p>Bantu Minion lari menghindari rintangan besaran pokok!<br>← → pindah jalur, ↑/Spasi lompat, ↓ merunduk</p>
+      <p>Pilih level kesulitan:</p>
+      <div class="modeBtns">
+        <button class="modeBtn easy" data-mode="easy">🟢 Easy</button>
+        <button class="modeBtn medium" data-mode="medium">🟠 Medium</button>
+        <button class="modeBtn hard" data-mode="hard">🔴 Hard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const W = 400, H = 700;
+const LANES = [-2.3, 0, 2.3];
+const GROUND_Y = 0;
+const PLAYER_Z = 0;
+const SPAWN_Z = -70;
+const REMOVE_Z = 8;
+
+const DIFFICULTIES = {
+  easy:   { label:'Easy',   baseSpeed:0.32, spawnBase:95, spawnMin:60, speedRampDiv:1300, coinChance:0.35 },
+  medium: { label:'Medium', baseSpeed:0.48, spawnBase:75, spawnMin:46, speedRampDiv:1050, coinChance:0.30 },
+  hard:   { label:'Hard',   baseSpeed:0.65, spawnBase:55, spawnMin:32, speedRampDiv:850,  coinChance:0.25 }
+};
+
+// Variasi rintangan: aksi hindar berbeda & kecepatan relatif berbeda
+const OBSTACLE_TYPES = [
+  { type:'barrel',   action:'lane', speedFactor:1.0,  color:0x8b5a2b, y:0.75, size:[1.4,1.5,1.4] },
+  { type:'low',      action:'jump', speedFactor:1.0,  color:0xc0392b, y:0.45, size:[1.7,0.95,1.05] },
+  { type:'high',     action:'duck', speedFactor:1.0,  color:0x555555, y:2.15, size:[2.0,0.5,0.8] },
+  { type:'fastball', action:'lane', speedFactor:1.4,  color:0xd63447, y:0.65, size:[1.1,1.1,1.1], sphere:true },
+  { type:'boulder',  action:'lane', speedFactor:0.65, color:0x6b6b6b, y:0.85, size:[1.5,1.5,1.5], sphere:true },
+  { type:'spike',    action:'jump', speedFactor:1.2,  color:0x7a1fa2, y:0.5,  size:[1.2,1.1,1.2], cone:true },
+  { type:'drone',    action:'duck', speedFactor:1.3,  color:0x2e86de, y:2.2,  size:[1.9,0.55,0.95] }
+];
+
+const BESARAN_POKOK = ['Panjang','Massa','Waktu','Kuat Arus','Suhu','Jumlah Zat','Intensitas Cahaya'];
+
+let state = {
+  running:false, alive:true, mode:'easy', diff:DIFFICULTIES.easy,
+  lane:1, targetX:0, jumping:false, vy:0, ducking:false,
+  speed:0.6, score:0, best:0, frame:0, spawnTimer:0
+};
+
+let scene, camera, renderer, player, playerParts = {};
+let obstacles = [], coins = [];
+let groundTexture, clock;
+
+function bestKey(mode){ return 'minionRunner3DBest_' + mode; }
+
+// ---------------- SETUP SCENE ----------------
+function initScene(){
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x8ec9ff);
+  scene.fog = new THREE.Fog(0x8ec9ff, 20, 70);
+
+  camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 200);
+  camera.position.set(0, 4.2, 7.5);
+  camera.lookAt(0, 1.4, -5);
+
+  renderer = new THREE.WebGLRenderer({ antialias:true });
+  renderer.setSize(W, H);
+  renderer.shadowMap.enabled = true;
+  document.getElementById('game3d').appendChild(renderer.domElement);
+
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x666666, 1.0);
+  scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+  dir.position.set(5, 12, 6);
+  dir.castShadow = true;
+  scene.add(dir);
+
+  buildGround();
+  buildRails();
+  player = buildPlayer();
+  scene.add(player);
+
+  clock = new THREE.Clock();
+  document.getElementById('loadingMsg').classList.add('hidden');
+}
+
+function buildGround(){
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 256;
+  const c = canvas.getContext('2d');
+  c.fillStyle = '#d8c48a'; c.fillRect(0,0,64,256);
+  c.strokeStyle = 'rgba(255,255,255,0.6)';
+  c.lineWidth = 3; c.setLineDash([14,14]);
+  c.beginPath(); c.moveTo(64/3,0); c.lineTo(64/3,256); c.stroke();
+  c.beginPath(); c.moveTo(64*2/3,0); c.lineTo(64*2/3,256); c.stroke();
+  groundTexture = new THREE.CanvasTexture(canvas);
+  groundTexture.wrapS = THREE.RepeatWrapping;
+  groundTexture.wrapT = THREE.RepeatWrapping;
+  groundTexture.repeat.set(1, 40);
+
+  const groundGeo = new THREE.PlaneGeometry(7, 300);
+  const groundMat = new THREE.MeshStandardMaterial({ map: groundTexture });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI/2;
+  ground.position.set(0, 0, -120);
+  ground.receiveShadow = true;
+  scene.add(ground);
+}
+
+function buildRails(){
+  const railMat = new THREE.MeshStandardMaterial({ color: 0x4a7fb5 });
+  [-3.4, 3.4].forEach(xPos => {
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.6, 300), railMat);
+    rail.position.set(xPos, 0.3, -120);
+    scene.add(rail);
+  });
+}
+
+function makeTextSprite(text){
+  const canvas = document.createElement('canvas');
+  const ctx2 = canvas.getContext('2d');
+  const fontSize = 46;
+  ctx2.font = `bold ${fontSize}px Arial`;
+  const words = text.split(' ');
+  let lines = words.length > 1 && ctx2.measureText(text).width > 260
+    ? [words.slice(0, Math.ceil(words.length/2)).join(' '), words.slice(Math.ceil(words.length/2)).join(' ')]
+    : [text];
+  canvas.width = 300;
+  canvas.height = 60 * lines.length + 20;
+  ctx2.font = `bold ${fontSize}px Arial`;
+  ctx2.textAlign = 'center';
+  ctx2.textBaseline = 'middle';
+  ctx2.fillStyle = 'rgba(255,255,255,0.92)';
+  roundRectPath(ctx2, 4, 4, canvas.width-8, canvas.height-8, 14);
+  ctx2.fill();
+  ctx2.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx2.lineWidth = 3;
+  roundRectPath(ctx2, 4, 4, canvas.width-8, canvas.height-8, 14);
+  ctx2.stroke();
+  ctx2.fillStyle = '#1a1a1a';
+  lines.forEach((line, i) => {
+    ctx2.fillText(line, canvas.width/2, 40 + i*58);
+  });
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent:true });
+  const sprite = new THREE.Sprite(mat);
+  const scale = 1.6;
+  sprite.scale.set(scale * (canvas.width/300), scale * (canvas.height/300), 1);
+  return sprite;
+}
+function roundRectPath(ctx2,x,y,w,h,r){
+  ctx2.beginPath();
+  ctx2.moveTo(x+r,y);
+  ctx2.arcTo(x+w,y,x+w,y+h,r);
+  ctx2.arcTo(x+w,y+h,x,y+h,r);
+  ctx2.arcTo(x,y+h,x,y,r);
+  ctx2.arcTo(x,y,x+w,y,r);
+  ctx2.closePath();
+}
+
+// ---------------- PLAYER (Minion berseragam) ----------------
+function makePlaidTexture(){
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx2 = c.getContext('2d');
+  ctx2.fillStyle = '#767f6d';
+  ctx2.fillRect(0,0,128,128);
+  ctx2.strokeStyle = 'rgba(35,35,30,0.55)';
+  ctx2.lineWidth = 3;
+  for(let i=-128;i<256;i+=16){
+    ctx2.beginPath(); ctx2.moveTo(i,0); ctx2.lineTo(i+128,128); ctx2.stroke();
+    ctx2.beginPath(); ctx2.moveTo(i+128,0); ctx2.lineTo(i,128); ctx2.stroke();
+  }
+  ctx2.strokeStyle = 'rgba(160,35,35,0.55)';
+  ctx2.lineWidth = 2;
+  for(let i=-128;i<256;i+=32){
+    ctx2.beginPath(); ctx2.moveTo(i,0); ctx2.lineTo(i+128,128); ctx2.stroke();
+  }
+  ctx2.strokeStyle = 'rgba(230,220,190,0.4)';
+  ctx2.lineWidth = 1.5;
+  for(let i=0;i<128;i+=16){
+    ctx2.beginPath(); ctx2.moveTo(0,i); ctx2.lineTo(128,i); ctx2.stroke();
+    ctx2.beginPath(); ctx2.moveTo(i,0); ctx2.lineTo(i,128); ctx2.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(1.3, 1.3);
+  return tex;
+}
+
+function buildPlayer(){
+  const g = new THREE.Group();
+
+  const yellowMat = new THREE.MeshStandardMaterial({ color:0xffd400 });
+  const bodyCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,1.0,16), yellowMat);
+  bodyCyl.position.y = 1.0;
+  bodyCyl.castShadow = true;
+  g.add(bodyCyl);
+
+  const topDome = new THREE.Mesh(new THREE.SphereGeometry(0.5,16,16), yellowMat);
+  topDome.scale.set(1,0.7,1);
+  topDome.position.y = 1.5;
+  g.add(topDome);
+
+  const botDome = new THREE.Mesh(new THREE.SphereGeometry(0.5,16,16), yellowMat);
+  botDome.scale.set(1,0.5,1);
+  botDome.position.y = 0.5;
+  g.add(botDome);
+
+  // kemeja putih (pelat depan + belakang)
+  const shirtMat = new THREE.MeshStandardMaterial({ color:0xffffff });
+  const shirtFront = new THREE.Mesh(new THREE.BoxGeometry(0.72,0.68,0.05), shirtMat);
+  shirtFront.position.set(0, 0.95, 0.49);
+  g.add(shirtFront);
+  const shirtBack = new THREE.Mesh(new THREE.BoxGeometry(0.72,0.68,0.05), shirtMat);
+  shirtBack.position.set(0, 0.95, -0.49);
+  g.add(shirtBack);
+
+  // lengan kemeja pendek (putih)
+  const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.28,10), shirtMat);
+  sleeveL.rotation.z = Math.PI/2;
+  sleeveL.position.set(-0.52, 1.18, 0);
+  g.add(sleeveL);
+  const sleeveR = sleeveL.clone();
+  sleeveR.position.x = 0.52;
+  g.add(sleeveR);
+
+  // vest/blazer kotak-kotak melingkar seluruh badan, dengan tekstur plaid asli
+  const plaidTex = makePlaidTexture();
+  const vestMat = new THREE.MeshStandardMaterial({ map: plaidTex, roughness:0.85 });
+  const vestBody = new THREE.Mesh(new THREE.CylinderGeometry(0.56,0.56,0.62,20,1,true), vestMat);
+  vestBody.position.y = 0.98;
+  g.add(vestBody);
+
+  // bahu vest (menutup pundak)
+  const shoulderMat = vestMat;
+  const shoulderL = new THREE.Mesh(new THREE.SphereGeometry(0.2,10,10), shoulderMat);
+  shoulderL.scale.set(1,0.8,1);
+  shoulderL.position.set(-0.42, 1.32, 0);
+  g.add(shoulderL);
+  const shoulderR = shoulderL.clone();
+  shoulderR.position.x = 0.42;
+  g.add(shoulderR);
+
+  // celah kerah depan (potongan V dari kain putih tambahan supaya vest terlihat terbuka)
+  const vNeckMat = shirtMat;
+  const vNeck = new THREE.Mesh(new THREE.BoxGeometry(0.24,0.42,0.07), vNeckMat);
+  vNeck.position.set(0, 1.08, 0.53);
+  g.add(vNeck);
+
+  // kancing vest
+  const buttonMat = new THREE.MeshStandardMaterial({ color:0x2b2b26, roughness:0.4, metalness:0.3 });
+  [0.9, 0.78, 0.66].forEach(yy => {
+    const btn = new THREE.Mesh(new THREE.SphereGeometry(0.025,8,8), buttonMat);
+    btn.position.set(-0.03, yy, 0.55);
+    g.add(btn);
+  });
+
+  // dasi maroon dengan simpul
+  const tieMat = new THREE.MeshStandardMaterial({ color:0x8c1d24 });
+  const tieKnot = new THREE.Mesh(new THREE.BoxGeometry(0.13,0.1,0.04), tieMat);
+  tieKnot.position.set(0, 1.14, 0.55);
+  g.add(tieKnot);
+  const tie = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.34,0.03), tieMat);
+  tie.position.set(0, 0.94, 0.55);
+  g.add(tie);
+
+  // lencana sekolah (bentuk generik, bukan logo asli)
+  const badgeMat = new THREE.MeshStandardMaterial({ color:0x2c4ea3 });
+  const badge = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.14,0.03), badgeMat);
+  badge.position.set(-0.35, 1.1, 0.53);
+  g.add(badge);
+  const badgeStripe = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.04,0.032), new THREE.MeshStandardMaterial({ color:0xf4c430 }));
+  badgeStripe.position.set(-0.35, 1.13, 0.535);
+  g.add(badgeStripe);
+
+  // goggle
+  const goggleRing = new THREE.Mesh(new THREE.TorusGeometry(0.22,0.05,10,20), new THREE.MeshStandardMaterial({ color:0x777777 }));
+  goggleRing.position.set(0, 1.55, 0.46);
+  g.add(goggleRing);
+  const eyeWhite = new THREE.Mesh(new THREE.CircleGeometry(0.16,16), new THREE.MeshStandardMaterial({ color:0xffffff }));
+  eyeWhite.position.set(0, 1.55, 0.5);
+  g.add(eyeWhite);
+  const pupil = new THREE.Mesh(new THREE.CircleGeometry(0.07,16), new THREE.MeshStandardMaterial({ color:0x2a1a0a }));
+  pupil.position.set(0.03, 1.55, 0.52);
+  g.add(pupil);
+
+  // celana abu-abu (kaki)
+  const pantsMat = new THREE.MeshStandardMaterial({ color:0x5b5f66 });
+  const shoeMat = new THREE.MeshStandardMaterial({ color:0x1c1c1c });
+
+  const legL = new THREE.Group();
+  const pantL = new THREE.Mesh(new THREE.BoxGeometry(0.22,0.5,0.24), pantsMat);
+  pantL.position.y = -0.25;
+  legL.add(pantL);
+  const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.24,0.15,0.32), shoeMat);
+  shoeL.position.y = -0.57;
+  shoeL.position.z = 0.05;
+  legL.add(shoeL);
+  legL.position.set(-0.2, 0.5, 0);
+  g.add(legL);
+
+  const legR = legL.clone();
+  legR.position.x = 0.2;
+  g.add(legR);
+
+  playerParts.legL = legL;
+  playerParts.legR = legR;
+  playerParts.body = g;
+
+  g.position.set(LANES[1], GROUND_Y, PLAYER_Z);
+  g.traverse(o => { if(o.isMesh) o.castShadow = true; });
+  return g;
+}
+
+// ---------------- OBSTACLE & COIN ----------------
+function spawnObstacle(){
+  const lane = Math.floor(Math.random()*3);
+  const def = OBSTACLE_TYPES[Math.floor(Math.random()*OBSTACLE_TYPES.length)];
+  const label = BESARAN_POKOK[Math.floor(Math.random()*BESARAN_POKOK.length)];
+
+  const group = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({ color: def.color });
+  let mesh;
+  if(def.sphere){
+    mesh = new THREE.Mesh(new THREE.SphereGeometry(def.size[0]/1.6, 14, 14), mat);
+  } else if(def.cone){
+    mesh = new THREE.Mesh(new THREE.ConeGeometry(def.size[0]/1.6, def.size[1]*1.4, 14), mat);
+  } else {
+    mesh = new THREE.Mesh(new THREE.BoxGeometry(def.size[0], def.size[1], def.size[2]), mat);
+  }
+  mesh.castShadow = true;
+  group.add(mesh);
+
+  const sprite = makeTextSprite(label);
+  sprite.position.set(0, def.y + def.size[1]/2 + 0.9, 0);
+  group.add(sprite);
+
+  group.position.set(LANES[lane], def.y, SPAWN_Z);
+  group.userData = { lane, def, label, passed:false };
+  scene.add(group);
+  obstacles.push(group);
+}
+
+function spawnCoin(){
+  const lane = Math.floor(Math.random()*3);
+  const mat = new THREE.MeshStandardMaterial({ color:0xffd700, metalness:0.4, roughness:0.3 });
+  const coin = new THREE.Mesh(new THREE.TorusGeometry(0.32,0.13,10,20), mat);
+  coin.rotation.x = Math.PI/2;
+  coin.position.set(LANES[lane], 1.1, SPAWN_Z);
+  coin.userData = { lane };
+  scene.add(coin);
+  coins.push(coin);
+}
+
+// ---------------- GAME LOGIC ----------------
+function resetGame(mode){
+  state.mode = mode;
+  state.diff = DIFFICULTIES[mode];
+  state.lane = 1;
+  state.targetX = LANES[1];
+  state.jumping = false;
+  state.vy = 0;
+  state.ducking = false;
+  state.speed = state.diff.baseSpeed;
+  state.score = 0;
+  state.frame = 0;
+  state.spawnTimer = 0;
+  state.running = true;
+  state.alive = true;
+  state.best = Number(localStorage.getItem(bestKey(mode)) || 0);
+
+  obstacles.forEach(o => scene.remove(o));
+  coins.forEach(c => scene.remove(c));
+  obstacles = [];
+  coins = [];
+
+  player.position.set(LANES[1], GROUND_Y, PLAYER_Z);
+  player.scale.set(1,1,1);
+
+  document.getElementById('modeLabel').textContent = state.diff.label;
+  document.getElementById('best').textContent = state.best;
+  document.getElementById('score').textContent = 0;
+}
+
+function update(){
+  state.frame++;
+  state.spawnTimer++;
+  const d = state.diff;
+  state.speed = d.baseSpeed + Math.min(state.frame / d.speedRampDiv, 0.45);
+
+  const spawnInterval = Math.max(d.spawnMin, d.spawnBase - state.frame/25);
+  if(state.spawnTimer > spawnInterval){
+    state.spawnTimer = 0;
+    if(Math.random() < d.coinChance) spawnCoin();
+    else spawnObstacle();
+  }
+
+  // gerak lompat
+  if(state.jumping){
+    state.vy -= 0.045;
+    player.position.y += state.vy;
+    if(player.position.y <= GROUND_Y){
+      player.position.y = GROUND_Y;
+      state.jumping = false;
+      state.vy = 0;
+    }
+  }
+
+  // merunduk
+  const targetScaleY = state.ducking ? 0.55 : 1;
+  player.scale.y += (targetScaleY - player.scale.y) * 0.35;
+
+  // pindah jalur halus
+  state.targetX = LANES[state.lane];
+  player.position.x += (state.targetX - player.position.x) * 0.25;
+
+  // animasi lari kaki
+  const swing = Math.sin(state.frame*0.35) * 0.5;
+  if(playerParts.legL && playerParts.legR){
+    playerParts.legL.rotation.x = swing;
+    playerParts.legR.rotation.x = -swing;
+  }
+
+  // gerak ground texture (scroll ilusi)
+  groundTexture.offset.y -= state.speed * 0.02;
+
+  // update rintangan
+  for(let i = obstacles.length-1; i>=0; i--){
+    const o = obstacles[i];
+    o.position.z += state.speed * o.userData.def.speedFactor;
+    if(o.position.z > REMOVE_Z){
+      scene.remove(o);
+      obstacles.splice(i,1);
+      continue;
+    }
+    if(!o.userData.passed && Math.abs(o.position.x - player.position.x) < 1.1 &&
+       o.position.z > PLAYER_Z - 1.0 && o.position.z < PLAYER_Z + 1.3){
+      const action = o.userData.def.action;
+      let hit = true;
+      if(action === 'jump' && state.jumping && player.position.y > 1.0) hit = false;
+      if(action === 'duck' && state.ducking) hit = false;
+      if(hit){ gameOver(); return; }
+      o.userData.passed = true;
+    }
+  }
+
+  // update koin
+  for(let i = coins.length-1; i>=0; i--){
+    const c = coins[i];
+    c.position.z += state.speed;
+    c.rotation.z += 0.15;
+    if(c.position.z > REMOVE_Z){
+      scene.remove(c);
+      coins.splice(i,1);
+      continue;
+    }
+    if(Math.abs(c.position.x - player.position.x) < 0.9 &&
+       c.position.z > PLAYER_Z - 1.0 && c.position.z < PLAYER_Z + 1.0){
+      state.score += 5;
+      scene.remove(c);
+      coins.splice(i,1);
+    }
+  }
+
+  state.score += 0.15;
+  document.getElementById('score').textContent = Math.floor(state.score);
+}
+
+function animate(){
+  if(state.running && state.alive){
+    update();
+    renderer.render(scene, camera);
+    if(state.alive) requestAnimationFrame(animate);
+  }
+}
+
+function gameOver(){
+  state.running = false;
+  state.alive = false;
+  const key = bestKey(state.mode);
+  if(state.score > state.best){
+    state.best = Math.floor(state.score);
+    localStorage.setItem(key, state.best);
+  }
+  document.getElementById('best').textContent = state.best;
+
+  const overlay = document.getElementById('overlay');
+  overlay.innerHTML = `
+    <h1>GAME OVER</h1>
+    <p>Mode: ${state.diff.label}</p>
+    <p>Skor kamu: ${Math.floor(state.score)}</p>
+    <p>Skor terbaik (${state.diff.label}): ${state.best}</p>
+    <button id="retryBtn" style="margin-top:16px;padding:12px 28px;font-size:18px;font-weight:bold;background:#ffe14d;border:none;border-radius:8px;cursor:pointer;box-shadow:0 4px 0 #c9a800;color:#333;">Main Lagi</button>
+    <div class="modeBtns" style="margin-top:14px;">
+      <button class="modeBtn easy" data-mode="easy">🟢 Easy</button>
+      <button class="modeBtn medium" data-mode="medium">🟠 Medium</button>
+      <button class="modeBtn hard" data-mode="hard">🔴 Hard</button>
+    </div>
+  `;
+  overlay.classList.remove('hidden');
+  bindOverlayButtons();
+}
+
+function startGame(mode){
+  document.getElementById('overlay').classList.add('hidden');
+  resetGame(mode);
+  animate();
+}
+
+function bindOverlayButtons(){
+  document.querySelectorAll('.modeBtn').forEach(btn => {
+    btn.onclick = () => startGame(btn.dataset.mode);
+  });
+  const retry = document.getElementById('retryBtn');
+  if(retry) retry.onclick = () => startGame(state.mode);
+}
+
+window.addEventListener('keydown', (e) => {
+  if(!state.running || !state.alive) return;
+  if(e.code === 'ArrowLeft'){ state.lane = Math.max(0, state.lane-1); }
+  else if(e.code === 'ArrowRight'){ state.lane = Math.min(2, state.lane+1); }
+  else if((e.code === 'ArrowUp' || e.code === 'Space') && !state.jumping){
+    state.jumping = true;
+    state.vy = 0.42;
+  }
+  else if(e.code === 'ArrowDown'){ state.ducking = true; }
+  e.preventDefault();
+});
+window.addEventListener('keyup', (e) => {
+  if(e.code === 'ArrowDown'){ state.ducking = false; }
+});
+
+let touchStartX=0, touchStartY=0;
+document.getElementById('game3d').addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+});
+document.getElementById('game3d').addEventListener('touchend', (e) => {
+  if(!state.running || !state.alive) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if(Math.abs(dx) > Math.abs(dy)){
+    if(dx > 30) state.lane = Math.min(2, state.lane+1);
+    else if(dx < -30) state.lane = Math.max(0, state.lane-1);
+  } else {
+    if(dy < -30 && !state.jumping){ state.jumping = true; state.vy = 0.42; }
+    else if(dy > 30){ state.ducking = true; setTimeout(()=>state.ducking=false, 500); }
+  }
+});
+
+initScene();
+bindOverlayButtons();
+renderer.render(scene, camera);
+</script>
+</body>
+</html>
