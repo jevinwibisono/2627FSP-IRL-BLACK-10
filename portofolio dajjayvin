@@ -1,0 +1,298 @@
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portofolio Profesional - Proyek & Karya Digital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #070b14; color: #f1f5f9; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card:hover { border-color: rgba(6, 182, 212, 0.4); }
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+
+  <!-- NAVIGATION BAR -->
+  <header class="glass-card sticky top-0 z-50 px-6 py-4 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-code"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white uppercase font-mono-code">PORTOFOLIO DIGITAL</h1>
+          <p class="text-xs text-slate-400">Ethan Jason • Dave Sieclan • Jevin Raphael Wibisono</p>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center space-x-6 text-xs font-semibold text-slate-300">
+        <a href="#cv" class="hover:text-cyan-400 transition">CV Tim</a>
+        <a href="#mooncake" class="hover:text-cyan-400 transition">Mooncake</a>
+        <a href="#storybook" class="hover:text-cyan-400 transition">Storybook</a>
+        <a href="#kamera" class="hover:text-cyan-400 transition">Projek Kamera</a>
+        <a href="#game" class="hover:text-cyan-400 transition">Game Website</a>
+        <a href="#website" class="hover:text-cyan-400 transition">Website Utama</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-10 space-y-20">
+
+    <!-- HERO SECTION -->
+    <section class="text-center space-y-4 pt-6">
+      <span class="px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono-code font-semibold tracking-wider uppercase">
+        Showcase Proyek & Karya Lengkap
+      </span>
+      <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white max-w-3xl mx-auto leading-tight">
+        Eksplorasi Kreatif, Presentasi Budaya, & Sistem Aplikasi Web
+      </h2>
+      <p class="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        Kumpulan dokumentasi, profil CV anggota, storybook imersif, sistem kecerdasan buatan, hingga game interaktif dalam satu portofolio terpadu.
+      </p>
+    </section>
+
+    <!-- SECTION 1: CV -->
+    <section id="cv" class="space-y-6 pt-6">
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-800">
+        <div class="p-2 rounded-xl bg-cyan-500/20 text-cyan-400"><i class="fa-solid fa-user-tie text-xl"></i></div>
+        <div>
+          <h3 class="text-xl font-bold text-white uppercase tracking-wide">Section 1: CV (Kurikulum Vitae Anggota)</h3>
+          <p class="text-xs text-slate-400">Profil ringkas, pendidikan, dan prestasi tim pengembang</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Ethan Jason -->
+        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="font-bold text-lg text-cyan-400">Ethan Jason</h4>
+              <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-mono-code">Pelajar</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              Murid SMA BPK PENABUR Holis serta aktif melakukan riset dan pengembangan di FSP Insight Research Lab.
+            </p>
+            <div class="text-xs space-y-1 text-slate-400 font-mono-code mb-4">
+              <div>📱 +895 627 493 366</div>
+              <div>✉️ ethanjason05@gmail.com</div>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-slate-800 text-[11px] text-slate-500">
+            Prestasi: Juara Esports Sekolah di Bandung
+          </div>
+        </div>
+
+        <!-- Dave Sieclan -->
+        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="font-bold text-lg text-emerald-400">Dave Sieclan</h4>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 text-xs font-mono-code">Pelajar</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              Murid SMA BPK Penabur Holis Bandung. Memiliki minat tinggi pada bidang teknologi, e-sports, dan pengembangan diri.
+            </p>
+            <div class="text-xs space-y-1 text-slate-400 font-mono-code mb-4">
+              <div>📱 +62 895 627 493 366</div>
+              <div>✉️ ethanjason05@gmail.com</div>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-slate-800 text-[11px] text-slate-500">
+            Prestasi: Juara Esport & Fashion Show
+          </div>
+        </div>
+
+        <!-- Jevin Raphael Wibisono -->
+        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="font-bold text-lg text-yellow-400">Jevin R. Wibisono</h4>
+              <span class="px-2.5 py-0.5 rounded-full bg-yellow-500/10 text-yellow-300 text-xs font-mono-code">Pelajar</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+              Siswa SMP Holis dengan keunggulan dalam komunikasi, kreativitas tinggi, dan kemampuan kerjasama tim yang sangat baik.
+            </p>
+            <div class="text-xs space-y-1 text-slate-400 font-mono-code mb-4">
+              <div>📱 +62 895-6274-93366</div>
+              <div>✉️ ethanjason05@gmail.com</div>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-slate-800 text-[11px] text-slate-500">
+            Prestasi: Catur Online & Wushu Tampil Seni
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: MOONCAKE -->
+    <section id="mooncake" class="space-y-6 pt-6">
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-800">
+        <div class="p-2 rounded-xl bg-amber-500/20 text-amber-400"><i class="fa-solid fa-moon text-xl"></i></div>
+        <div>
+          <h3 class="text-xl font-bold text-white uppercase tracking-wide">Section 2: Mooncake (Presentasi Festival Kue Bulan)</h3>
+          <p class="text-xs text-slate-400">Dek presentasi interaktif Imersif bertema Mid-Autumn Festival</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 space-y-4">
+          <span class="px-3 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-mono-code">Interactive Presentation Deck</span>
+          <h4 class="text-2xl font-bold text-white">Festival Perayaan Kue Bulan (Mid-Autumn Festival)</h4>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Menampilkan estetika langit malam dengan animasi bulan purnama bersinar, lampion terbang interaktif, narasi legenda Chang'e & Hou Yi, serta modul kuis mandiri 15 soal ujian pengetahuan budaya.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs font-mono-code text-slate-400">
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">HTML5/CSS3 Animations</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Glassmorphism UI</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Dynamic Quiz Engine</span>
+          </div>
+        </div>
+        <div class="lg:col-span-5 bg-slate-950 p-6 rounded-xl border border-slate-800/80 text-center space-y-3">
+          <i class="fa-solid fa-person-chalkboard text-4xl text-amber-400 mb-1"></i>
+          <h5 class="font-bold text-sm text-white">Fitur Unggulan Mooncake Deck</h5>
+          <p class="text-xs text-slate-400">Dilengkapi navigasi slide responsif, kartu informasi legenda, dan kalkulator skor kuis instan.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: STORYBOOK (GUNCANGAN NEO RIM) -->
+    <section id="storybook" class="space-y-6 pt-6">
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-800">
+        <div class="p-2 rounded-xl bg-purple-500/20 text-purple-400"><i class="fa-solid fa-book-open text-xl"></i></div>
+        <div>
+          <h3 class="text-xl font-bold text-white uppercase tracking-wide">Section 3: Guncangan Neo Rim (Storybook)</h3>
+          <p class="text-xs text-slate-400">Buku cerita digital imersif dengan alur naratif petualangan fiksi ilmiah</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 space-y-4">
+          <span class="px-3 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 text-xs font-mono-code">Digital Storybook Experience</span>
+          <h4 class="text-2xl font-bold text-white">Guncangan Neo Rim — Narasi & Petualangan</h4>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Sebuah karya literasi digital dan storybook interaktif yang membawa pembaca menyusuri ketegangan di koloni luar angkasa Neo Rim saat menghadapi bencana guncangan tektonik antarbintang.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs font-mono-code text-slate-400">
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Immersive Typography</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Sci-Fi Lore</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Visual Storytelling</span>
+          </div>
+        </div>
+        <div class="lg:col-span-5 bg-slate-950 p-6 rounded-xl border border-slate-800/80 text-center space-y-3">
+          <i class="fa-solid fa-satellite text-4xl text-purple-400 mb-1"></i>
+          <h5 class="font-bold text-sm text-white">Eksplorasi Dunia Fiksi</h5>
+          <p class="text-xs text-slate-400">Desain visual bertema kosmik futuristik untuk pengalaman membaca cerita yang memukau.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: PROJEK KAMERA INTERNAL -->
+    <section id="kamera" class="space-y-6 pt-6">
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-800">
+        <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400"><i class="fa-solid fa-camera-retro text-xl"></i></div>
+        <div>
+          <h3 class="text-xl font-bold text-white uppercase tracking-wide">Section 4: Projek Kamera Internal (Pendeteksi Objek Presisi Tinggi)</h3>
+          <p class="text-xs text-slate-400">Sistem computer vision real-time berbasis TensorFlow.js & COCO-SSD</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 space-y-4">
+          <span class="px-3 py-1 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-mono-code">AI Computer Vision System</span>
+          <h4 class="text-2xl font-bold text-white">Pendeteksi Objek Presisi Tinggi — Projek Kamera Internal</h4>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Aplikasi pemindai visual multi-perangkat (laptop, HP, tablet, iPad) yang mendeteksi objek secara langsung di depan lensa kamera. Dilengkapi filter threshold, EMA bounding box smoothing, serta integrasi Gemini AI untuk inspeksi mendalam.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs font-mono-code text-slate-400">
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">TensorFlow.js</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">COCO-SSD Model</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Real-Time HUD</span>
+          </div>
+        </div>
+        <div class="lg:col-span-5 bg-slate-950 p-6 rounded-xl border border-slate-800/80 text-center space-y-3">
+          <i class="fa-solid fa-crosshairs text-4xl text-indigo-400 mb-1"></i>
+          <h5 class="font-bold text-sm text-white">Akurasi & Telemetri</h5>
+          <p class="text-xs text-slate-400">Dilengkapi penghitung FPS, latensi, perekaman snapshot, serta deteksi koordinat bounding box presisi.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: WEBSITE GAME -->
+    <section id="game" class="space-y-6 pt-6">
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-800">
+        <div class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400"><i class="fa-solid fa-gamepad text-xl"></i></div>
+        <div>
+          <h3 class="text-xl font-bold text-white uppercase tracking-wide">Section 5: Website Game (Minion Runner & Flappy Bird)</h3>
+          <p class="text-xs text-slate-400">Koleksi game arkade interaktif berbasis HTML5 Canvas</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 space-y-4">
+          <span class="px-3 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono-code">HTML5 Canvas Arcade Games</span>
+          <h4 class="text-2xl font-bold text-white">Minion Runner & Flappy Bird (Easy Mode)</h4>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Permainan arkade ringan dengan kalibrasi fisika santai. Menampilkan kontrol responsif (keyboard & sentuh layar), tingkat kesulitan (Easy, Medium, Hard), serta penyimpanan skor tertinggi via <code>localStorage</code>.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs font-mono-code text-slate-400">
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">HTML5 Canvas</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Smooth Physics Engine</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Local Highscore</span>
+          </div>
+        </div>
+        <div class="lg:col-span-5 bg-slate-950 p-6 rounded-xl border border-slate-800/80 text-center space-y-3">
+          <i class="fa-solid fa-trophy text-4xl text-emerald-400 mb-1"></i>
+          <h5 class="font-bold text-sm text-white">Interaktif & Menghibur</h5>
+          <p class="text-xs text-slate-400">Dioptimalkan untuk dimainkan langsung di berbagai perangkat dengan performa mulus.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: WEBSITE -->
+    <section id="website" class="space-y-6 pt-6">
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-800">
+        <div class="p-2 rounded-xl bg-rose-500/20 text-rose-400"><i class="fa-solid fa-globe text-xl"></i></div>
+        <div>
+          <h3 class="text-xl font-bold text-white uppercase tracking-wide">Section 6: Website (VantagePoint Live Observability)</h3>
+          <p class="text-xs text-slate-400">Platform pemantauan web interaktif, trace request, dan analitik error</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 space-y-4">
+          <span class="px-3 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 text-xs font-mono-code">Live Observability Console</span>
+          <h4 class="text-2xl font-bold text-white">VantagePoint — Real-Time Monitoring Web Dashboard</h4>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Website dasbor analitik observabilitas langsung yang menangkap trace request, klastering error otomatis, simulasi injeksi kegagalan, pemutaran ulang versi kode (version replay), serta metrik performa tinggi.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs font-mono-code text-slate-400">
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Live Console UI</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Error Clustering</span>
+            <span class="px-2.5 py-1 bg-slate-900 rounded border border-slate-800">Interactive Metrics</span>
+          </div>
+        </div>
+        <div class="lg:col-span-5 bg-slate-950 p-6 rounded-xl border border-slate-800/80 text-center space-y-3">
+          <i class="fa-solid fa-chart-line text-4xl text-rose-400 mb-1"></i>
+          <h5 class="font-bold text-sm text-white">Dashboard Canggih</h5>
+          <p class="text-xs text-slate-400">Antarmuka kelas enterprise dengan simulasi data langsung di peramban web Anda.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="glass-card border-t border-slate-800 py-6 px-6 text-center text-xs text-slate-500 mt-20">
+    <p>Portofolio Profesional & Proyek Digital Terpadu — Dibuat khusus untuk presentasi karya terbaik.</p>
+  </footer>
+
+</body>
+</html>
